@@ -41,6 +41,12 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
   const [pricePerPerson, setPricePerPerson] = useState('');
   const [seatsLeft, setSeatsLeft] = useState(3);
 
+  const [errors, setErrors] = useState({
+    locations: '',
+    date: '',
+    timeRange: ''
+  });
+
   const today = new Date().toISOString().split('T')[0]; 
 
   const handleStartLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -49,6 +55,7 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
     if(value !== 'custom'){
       setCustomStartLocation('');
     }
+    validateLocations(value, endLocation);
   };
   
   const handleEndLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -57,6 +64,79 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
     if(value !== 'custom'){
       setCustomEndLocation('');
     }
+    validateLocations(startLocation, value);
+  };
+  
+  // to&from not same and atleast on should be uni
+  const validateLocations = (start: string, end: string) => {
+    const actualStart = start === 'custom' ? customStartLocation : start;
+    const actualEnd = end === 'custom' ? customEndLocation : end;
+    if(actualStart && actualEnd && actualStart === actualEnd) {
+      setErrors(prev => ({ ...prev, locations: 'Start and end locations cannot be the same' }));
+      return false;
+    }
+    if (actualStart && actualEnd && 
+        actualStart !== 'VIT BHOPAL UNIVERSITY' && 
+        actualEnd !== 'VIT BHOPAL UNIVERSITY') {
+      setErrors(prev => ({ ...prev, locations: 'At least one location must be VIT BHOPAL UNIVERSITY' }));
+      return false;
+    }
+
+    setErrors(prev => ({ ...prev, locations: '' }));
+    return true;
+  };
+
+  const validateDate = (selectedDate: string) => {
+    if (!selectedDate) return false;
+
+    const selected = new Date(selectedDate);
+    const current = new Date();
+    current.setHours(0, 0, 0, 0);
+
+    if (selected < current) {
+      setErrors(prev => ({ ...prev, date: 'Date cannot be in the past' }));
+      return false;
+    }
+
+    setErrors(prev => ({ ...prev, date: '' }));
+    return true;
+  };
+
+  const validateTimeRange = (start: string, end: string) => {
+    if (!start || !end) return true; 
+
+    if (start && end && start > end) {
+      setErrors(prev => ({ ...prev, timeRange: 'End time must be after start time' }));
+      return false;
+    }
+
+    setErrors(prev => ({ ...prev, timeRange: '' }));
+    return true;
+  };
+
+ 
+  useEffect(() => {
+    if (startLocation === 'custom' || endLocation === 'custom') {
+      validateLocations(startLocation, endLocation);
+    }
+  }, [customStartLocation, customEndLocation]);
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setDate(value);
+    validateDate(value);
+  };
+
+  const handleDepartureTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setDepartureTime(value);
+    validateTimeRange(value, arrivalTime);
+  };
+
+  const handleArrivalTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setArrivalTime(value);
+    validateTimeRange(departureTime, value);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -64,6 +144,14 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
     
     const actualStartLocation = startLocation === 'custom' ? customStartLocation : startLocation;
     const actualEndLocation = endLocation === 'custom' ? customEndLocation : endLocation;
+    
+    const isLocationsValid = validateLocations(startLocation, endLocation);
+    const isDateValid = validateDate(date);
+    const isTimeRangeValid = validateTimeRange(departureTime, arrivalTime);
+    
+    if (!isLocationsValid || !isDateValid || !isTimeRangeValid) {
+      return;
+    }
     
     let timeRangeText = '';
     if (isTravelingAround) {
@@ -141,7 +229,7 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
                   <select 
                     value={startLocation} 
                     onChange={handleStartLocationChange}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                    className={`w-full p-3 border ${errors.locations ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
                     required
                   >
                     <option value="">Select Location</option>
@@ -157,7 +245,7 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
                         type="text"
                         value={customStartLocation}
                         onChange={(e) => setCustomStartLocation(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        className={`w-full p-3 border ${errors.locations ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
                         placeholder="Enter your start location"
                         required
                       />
@@ -170,7 +258,7 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
                   <select 
                     value={endLocation} 
                     onChange={handleEndLocationChange}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                    className={`w-full p-3 border ${errors.locations ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
                     required
                   >
                     <option value="">Select Location</option>
@@ -186,13 +274,17 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
                         type="text"
                         value={customEndLocation}
                         onChange={(e) => setCustomEndLocation(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                        className={`w-full p-3 border ${errors.locations ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`}
                         placeholder="Enter your destination"
                         required
                       />
                     </div>
                   )}
                 </div>
+                
+                {errors.locations && (
+                  <div className="text-red-500 text-sm mt-1">{errors.locations}</div>
+                )}
                 
                 <div>
                   <label className="block mb-1 text-sm font-medium text-gray-700">Midway Drops (Optional)</label>
@@ -218,11 +310,14 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
                   <input 
                     type="date" 
                     value={date} 
-                    onChange={(e) => setDate(e.target.value)} 
+                    onChange={handleDateChange} 
                     min={today}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" 
+                    className={`w-full p-3 border ${errors.date ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`} 
                     required 
                   />
+                  {errors.date && (
+                    <div className="text-red-500 text-sm mt-1">{errors.date}</div>
+                  )}
                 </div>
                 
                 <div>
@@ -233,8 +328,8 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
                       <input 
                         type="time" 
                         value={departureTime} 
-                        onChange={(e) => setDepartureTime(e.target.value)} 
-                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" 
+                        onChange={handleDepartureTimeChange} 
+                        className={`w-full p-3 border ${errors.timeRange ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`} 
                         required={!isTravelingAround} 
                       />
                     </div>
@@ -244,11 +339,14 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
                       <input 
                         type="time" 
                         value={arrivalTime} 
-                        onChange={(e) => setArrivalTime(e.target.value)} 
-                        className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" 
+                        onChange={handleArrivalTimeChange} 
+                        className={`w-full p-3 border ${errors.timeRange ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`} 
                       />
                     </div>
                   </div>
+                  {errors.timeRange && (
+                    <div className="text-red-500 text-sm mt-1">{errors.timeRange}</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -278,7 +376,7 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
                         value={carName} 
                         onChange={(e) => setCarName(e.target.value)} 
                         className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" 
-                        placeholder="e.g. Ertiga, Lord Omni"
+                        placeholder="e.g. Ertiga/Load Omni"
                       />
                     </div>
                     
