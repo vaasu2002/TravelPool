@@ -17,7 +17,7 @@ export async function GET() {
   const allPools = await db.collection('taxiPools').find().sort({ date: -1 }).toArray();
 
   const upcomingPools = allPools.filter(pool => {
-    const [_, endTime] = pool.timeRange.split(' - ');
+    const [, endTime] = pool.timeRange.split(' - ');
     const poolDateTime = moment.tz(`${pool.date} ${endTime}`, 'YYYY-MM-DD HH:mm', 'Asia/Kolkata');
     return poolDateTime.isAfter(nowIST);
   });

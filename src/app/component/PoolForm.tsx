@@ -32,7 +32,7 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
   
   // Time deeds
   const [date, setDate] = useState('');
-  const [isTravelingAround, setIsTravelingAround] = useState(false);
+  // Removed unused state for traveling around - we'll add a UI for this later if needed
   const [departureTime, setDepartureTime] = useState('');
   const [arrivalTime, setArrivalTime] = useState('');
   
@@ -119,7 +119,7 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
     if (startLocation === 'custom' || endLocation === 'custom') {
       validateLocations(startLocation, endLocation);
     }
-  }, [customStartLocation, customEndLocation]);
+  }, [customStartLocation, customEndLocation, startLocation, endLocation, validateLocations]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -154,9 +154,8 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
     }
     
     let timeRangeText = '';
-    if (isTravelingAround) {
-      timeRangeText = 'Traveling around';
-    } else if (departureTime && arrivalTime) {
+    // Since we're not using isTravelingAround, we'll simplify this logic
+    if (departureTime && arrivalTime) {
       timeRangeText = `${departureTime} - ${arrivalTime}`;
     } else {
       timeRangeText = departureTime;
@@ -321,7 +320,7 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
                 </div>
                 
                 <div>
-                  <span>What time you wanna leave between?(eg- between 9am and 10am)</span>
+                  <span>What time do you want to leave between? (e.g. between 9am and 10am)</span>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block mb-1 text-sm font-medium text-gray-700">Leave After*</label>
@@ -330,7 +329,7 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
                         value={departureTime} 
                         onChange={handleDepartureTimeChange} 
                         className={`w-full p-3 border ${errors.timeRange ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors`} 
-                        required={!isTravelingAround} 
+                        required 
                       />
                     </div>
                     
