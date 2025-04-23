@@ -24,7 +24,7 @@ const PoolCard: React.FC<PoolCardProps> = ({ pool }) => {
       <div className="p-5">
         <div className="flex justify-between items-start mb-3">
           <h3 className="font-semibold text-lg text-gray-800">
-            {pool.name}
+            {/* {pool.name} */}
           </h3>
           <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-3 py-1.5 rounded-full">
             {pool.date}
