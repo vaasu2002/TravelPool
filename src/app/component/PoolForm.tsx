@@ -321,7 +321,7 @@ const PoolForm: React.FC<PoolFormProps> = ({ onSubmit, onCancel }) => {
                 </div>
                 
                 <div>
-                  <span>Would time you wanna leave between?(eg- between 9am and 10am)</span>
+                  <span>What time you wanna leave between?(eg- between 9am and 10am)</span>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block mb-1 text-sm font-medium text-gray-700">Leave After*</label>
