@@ -1,4 +1,3 @@
-// app/components/NoPoolsCTA.tsx
 import React from 'react';
 
 interface NoPoolsCTAProps {
