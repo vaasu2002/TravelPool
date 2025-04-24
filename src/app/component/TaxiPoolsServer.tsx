@@ -7,7 +7,7 @@ export async function getTaxiPools() {
   const nowIST = moment().tz('Asia/Kolkata');
   
   try {
-    const allPools = await db.collection('taxiPools').find().sort({ date: -1 }).toArray();
+    const allPools = await db.collection('taxiPools').find().sort({ date: 1 }).toArray();
     
     const upcomingPools = allPools.filter((pool: { timeRange: string; date: any; }) => {
       try {
