@@ -1,26 +1,32 @@
 import { MongoClient } from 'mongodb';
 
-if (!process.env.MONGODB_URI) {
+let cachedClient: MongoClient | null = null;
+let cachedDb: any = null;
+
+if(!process.env.MONGODB_URI){
   throw new Error('Please define the MONGODB_URI environment variable');
 }
 
+
 const uri = process.env.MONGODB_URI;
-const options = {};
 
-const client = new MongoClient(uri, options);
-const clientPromise = client.connect();
+export async function connectToDatabase(){
+  if(cachedClient && cachedDb){
+    return { 
+      client: cachedClient, 
+      db: cachedDb 
+    };
+  }
 
-declare global {
-  // Use globalThis to avoid the "no-var" error
-  // You can attach it to globalThis for caching if needed
-  // For now, we can omit this unless you're planning to cache it
-  // interface Global {
-  //   _mongoClientPromise: Promise<MongoClient>;
-  // }
-}
-
-export async function connectToDatabase() {
-  const client = await clientPromise;
+  const client = new MongoClient(uri as string);
+  await client.connect();
   const db = client.db('TravelPool');
-  return { client, db };
+
+  cachedClient = client;
+  cachedDb = db;
+  
+  return { 
+    client, 
+    db 
+  };
 }
