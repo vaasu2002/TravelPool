@@ -63,7 +63,7 @@ export default function ClientWrapper({ initialTaxiPools }: ClientWrapperProps) 
                 id: newPool.id || Date.now()
             };
             
-            const response = await fetch('/api/pools', {
+            const response = await fetch('/api/taxiPools', {
                 method: 'POST',
                 headers: {
                 'Content-Type': 'application/json',
