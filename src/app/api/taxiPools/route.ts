@@ -44,7 +44,7 @@ export async function GET() {
     const { db } = await connectToDatabase();
     const nowIST = moment().tz('Asia/Kolkata');
     
-    const allPools = await db.collection('taxiPools').find().sort({ date: -1 }).toArray() as MongoDBTaxiPool[];
+    const allPools = await db.collection('taxiPools').find().sort({ date: 1 }).toArray() as MongoDBTaxiPool[];
     
     const upcomingPools = allPools.filter(pool => isPoolInFuture(pool, nowIST));
     
