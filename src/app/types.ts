@@ -5,7 +5,7 @@ export interface CarDetails {
 }
   
 export interface TaxiPool {
-    id: number;
+    id: string | number;
     name: string;
     gender: string;
     phone: string;
